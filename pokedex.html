@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pokédex</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red: #e63946;
+      --dark-red: #c1121f;
+      --yellow: #ffd60a;
+      --dark: #1a1a2e;
+      --darker: #0f0f1a;
+      --card-bg: #16213e;
+      --card-border: #0f3460;
+      --text: #edf2f4;
+      --muted: #8d99ae;
+      --white: #ffffff;
+      --radius: 16px;
+
+      --type-normal: #A8A878; --type-fire: #F08030; --type-water: #6890F0;
+      --type-electric: #F8D030; --type-grass: #78C850; --type-ice: #98D8D8;
+      --type-fighting: #C03028; --type-poison: #A040A0; --type-ground: #E0C068;
+      --type-flying: #A890F0; --type-psychic: #F85888; --type-bug: #A8B820;
+      --type-rock: #B8A038; --type-ghost: #705898; --type-dragon: #7038F8;
+      --type-dark: #705848; --type-steel: #B8B8D0; --type-fairy: #EE99AC;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--darker);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* BG pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle at 20% 20%, rgba(230,57,70,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(112,56,248,0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .pokeball-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+
+    .title-group h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(14px, 3vw, 22px);
+      color: var(--red);
+      text-shadow: 3px 3px 0 #000, -1px -1px 0 #000;
+      line-height: 1.4;
+    }
+
+    .title-group p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* REGION SELECT */
+    .region-section {
+      margin-bottom: 36px;
+    }
+
+    .section-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .region-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .region-btn {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      color: var(--muted);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 10px 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: capitalize;
+      letter-spacing: 0.5px;
+    }
+
+    .region-btn:hover {
+      border-color: var(--red);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+
+    .region-btn.active {
+      background: var(--red);
+      border-color: var(--dark-red);
+      color: var(--white);
+      box-shadow: 0 4px 20px rgba(230,57,70,0.4);
+    }
+
+    /* SEARCH */
+    .search-bar {
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 20px 14px 50px;
+      border-radius: 50px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-bar input:focus { border-color: var(--red); }
+    .search-bar input::placeholder { color: var(--muted); }
+
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    /* POKEMON GRID */
+    .pokemon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .pokemon-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px 12px;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pokemon-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 70%);
+      pointer-events: none;
+    }
+
+    .pokemon-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--red);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(230,57,70,0.3);
+    }
+
+    .pokemon-card:hover .pokemon-sprite { transform: scale(1.1); }
+
+    .pokemon-number {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .pokemon-sprite {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      transition: transform 0.3s;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    }
+
+    .pokemon-sprite-placeholder {
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      font-size: 36px;
+      opacity: 0.3;
+    }
+
+    .pokemon-name {
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: capitalize;
+      margin-top: 8px;
+      color: var(--text);
+    }
+
+    .type-badges {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .type-badge {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 50px;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    /* LOADING STATE */
+    .loading-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .skeleton-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px 12px;
+      text-align: center;
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--card-border) 25%, #1e2f5a 50%, var(--card-border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    .skeleton-circle { width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 10px; }
+    .skeleton-line { height: 12px; margin: 6px auto; }
+    .skeleton-line.short { width: 60%; }
+    .skeleton-line.med { width: 80%; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state .emoji { font-size: 64px; margin-bottom: 16px; }
+    .empty-state p { font-size: 15px; }
+
+    /* MODAL OVERLAY */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* MODAL CARD */
+    .modal-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      transform: translateY(30px) scale(0.95);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.open .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-hero {
+      padding: 40px 30px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .modal-bg-number {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 48px;
+      color: rgba(255,255,255,0.04);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .modal-sprite {
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.6));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .modal-name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(12px, 3vw, 18px);
+      color: var(--white);
+      text-transform: capitalize;
+      margin-top: 12px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+
+    .modal-number {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .modal-types {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    .modal-types .type-badge {
+      font-size: 11px;
+      padding: 5px 16px;
+    }
+
+    .modal-body {
+      padding: 0 28px 32px;
+    }
+
+    .modal-section {
+      margin-top: 24px;
+    }
+
+    .modal-section-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .info-item {
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    .info-item-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: capitalize;
+      margin-bottom: 4px;
+    }
+
+    .info-item-value {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      text-transform: capitalize;
+    }
+
+    /* STATS */
+    .stat-row {
+      display: grid;
+      grid-template-columns: 100px 1fr 40px;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .stat-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: capitalize;
+    }
+
+    .stat-bar-bg {
+      background: rgba(255,255,255,0.08);
+      border-radius: 50px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      border-radius: 50px;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-value {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+      text-align: right;
+    }
+
+    /* ABILITIES */
+    .abilities-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ability-tag {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: capitalize;
+      color: var(--text);
+    }
+
+    .ability-tag.hidden {
+      border-color: var(--yellow);
+      color: var(--yellow);
+    }
+
+    /* CLOSE BUTTON */
+    .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      z-index: 1;
+    }
+
+    .close-btn:hover { background: rgba(230,57,70,0.4); }
+
+    /* DESCRIPTION */
+    .flavor-text {
+      background: rgba(255,255,255,0.04);
+      border-left: 3px solid var(--red);
+      border-radius: 0 12px 12px 0;
+      padding: 14px 16px;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* SHINY TOGGLE */
+    .sprite-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .shiny-toggle {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--muted);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .shiny-toggle.active {
+      background: rgba(255,214,10,0.15);
+      border-color: var(--yellow);
+      color: var(--yellow);
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--darker); }
+    ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+
+    /* RESPONSIVE */
+    @media (max-width: 500px) {
+      .info-grid { grid-template-columns: 1fr; }
+      .stat-row { grid-template-columns: 80px 1fr 36px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <svg class="pokeball-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#e63946" stroke="#000" stroke-width="4"/>
+      <path d="M2 50 Q2 2 50 2" fill="#e63946"/>
+      <path d="M50 2 Q98 2 98 50" fill="#e63946"/>
+      <rect x="2" y="46" width="96" height="8" fill="#000"/>
+      <circle cx="50" cy="50" r="14" fill="#000" stroke="#000" stroke-width="4"/>
+      <circle cx="50" cy="50" r="10" fill="white"/>
+      <circle cx="50" cy="50" r="5" fill="#e63946"/>
+    </svg>
+    <div class="title-group">
+      <h1>Pokédex</h1>
+      <p>Explore all Pokémon regions & find your favourites!</p>
+    </div>
+  </header>
+
+  <div class="region-section">
+    <div class="section-label">Choose a Region</div>
+    <div class="region-grid" id="regionGrid"></div>
+  </div>
+
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search Pokémon by name..." autocomplete="off"/>
+  </div>
+
+  <div id="mainContent"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card" id="modalCard">
+    <button class="close-btn" id="closeBtn">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+const REGIONS = [
+  { name: 'Kanto',  id: 'kanto',  offset: 0,   limit: 151 },
+  { name: 'Johto',  id: 'johto',  offset: 151, limit: 100 },
+  { name: 'Hoenn',  id: 'hoenn',  offset: 251, limit: 135 },
+  { name: 'Sinnoh', id: 'sinnoh', offset: 386, limit: 107 },
+  { name: 'Unova',  id: 'unova',  offset: 493, limit: 156 },
+  { name: 'Kalos',  id: 'kalos',  offset: 649, limit: 72  },
+  { name: 'Alola',  id: 'alola',  offset: 721, limit: 88  },
+  { name: 'Galar',  id: 'galar',  offset: 809, limit: 96  },
+];
+
+const TYPE_COLORS = {
+  normal:'#A8A878',fire:'#F08030',water:'#6890F0',electric:'#F8D030',
+  grass:'#78C850',ice:'#98D8D8',fighting:'#C03028',poison:'#A040A0',
+  ground:'#E0C068',flying:'#A890F0',psychic:'#F85888',bug:'#A8B820',
+  rock:'#B8A038',ghost:'#705898',dragon:'#7038F8',dark:'#705848',
+  steel:'#B8B8D0',fairy:'#EE99AC',
+};
+
+const STAT_COLORS = {
+  hp:'#FF5959', attack:'#F5AC78', defense:'#FAE078',
+  'special-attack':'#9DB7F5', 'special-defense':'#A7DB8D', speed:'#FA92B2'
+};
+
+const STAT_LABELS = {
+  hp:'HP', attack:'Attack', defense:'Defense',
+  'special-attack':'Sp. Atk', 'special-defense':'Sp. Def', speed:'Speed'
+};
+
+let currentRegion = REGIONS[0];
+let allPokemon = [];
+let filteredPokemon = [];
+let cache = {};
+
+function renderRegions() {
+  const grid = document.getElementById('regionGrid');
+  grid.innerHTML = REGIONS.map(r => `
+    <button class="region-btn ${r.id === currentRegion.id ? 'active' : ''}"
+      onclick="selectRegion('${r.id}')">${r.name}</button>
+  `).join('');
+}
+
+async function selectRegion(id) {
+  currentRegion = REGIONS.find(r => r.id === id);
+  document.getElementById('searchInput').value = '';
+  renderRegions();
+  await loadRegion();
+}
+
+function showLoading() {
+  const skeletons = Array.from({length: 12}, () => `
+    <div class="skeleton-card">
+      <div class="skeleton skeleton-line short" style="height:10px;margin-bottom:10px"></div>
+      <div class="skeleton skeleton-circle"></div>
+      <div class="skeleton skeleton-line med"></div>
+      <div class="skeleton skeleton-line short"></div>
+    </div>
+  `).join('');
+  document.getElementById('mainContent').innerHTML = `<div class="loading-grid">${skeletons}</div>`;
+}
+
+async function loadRegion() {
+  showLoading();
+  const { offset, limit, id } = currentRegion;
+  const key = id;
+
+  if (!cache[key]) {
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`);
+      const data = await res.json();
+      cache[key] = data.results.map((p, i) => ({
+        name: p.name,
+        id: offset + i + 1,
+        url: p.url,
+      }));
+    } catch(e) {
+      document.getElementById('mainContent').innerHTML = `
+        <div class="empty-state">
+          <div class="emoji">😵</div>
+          <p>Couldn't connect to PokéAPI. Check your internet and try again!</p>
+        </div>`;
+      return;
+    }
+  }
+
+  allPokemon = cache[key];
+  filteredPokemon = [...allPokemon];
+  renderGrid(filteredPokemon);
+}
+
+function renderGrid(list) {
+  if (list.length === 0) {
+    document.getElementById('mainContent').innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">🔎</div>
+        <p>No Pokémon found matching your search.</p>
+      </div>`;
+    return;
+  }
+  document.getElementById('mainContent').innerHTML = `
+    <div class="pokemon-grid">
+      ${list.map(p => renderCard(p)).join('')}
+    </div>`;
+}
+
+function renderCard(p) {
+  const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`;
+  return `
+    <div class="pokemon-card" onclick="openModal(${p.id}, '${p.name}')">
+      <div class="pokemon-number">#${String(p.id).padStart(3,'0')}</div>
+      <img class="pokemon-sprite" src="${spriteUrl}" alt="${p.name}" loading="lazy"
+        onerror="this.style.display='none'"/>
+      <div class="pokemon-name">${p.name}</div>
+    </div>`;
+}
+
+// SEARCH
+document.getElementById('searchInput').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase().trim();
+  filteredPokemon = allPokemon.filter(p => p.name.includes(q));
+  renderGrid(filteredPokemon);
+});
+
+// MODAL
+async function openModal(id, name) {
+  const overlay = document.getElementById('modalOverlay');
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-hero">
+      <div style="width:160px;height:160px;margin:0 auto;display:flex;align-items:center;justify-content:center;">
+        <div style="font-size:48px;opacity:0.3">⏳</div>
+      </div>
+      <div class="modal-name">${name}</div>
+    </div>`;
+  overlay.classList.add('open');
+
+  try {
+    const [poke, species] = await Promise.all([
+      fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then(r => r.json()),
+      fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`).then(r => r.json()),
+    ]);
+    renderModal(poke, species);
+  } catch(e) {
+    document.getElementById('modalContent').innerHTML = `
+      <div style="padding:40px;text-align:center;color:#8d99ae;">
+        <div style="font-size:48px">😵</div>
+        <p style="margin-top:16px">Couldn't load details. Try again!</p>
+      </div>`;
+  }
+}
+
+let currentShiny = false;
+
+function renderModal(poke, species) {
+  currentShiny = false;
+  const spriteNormal = poke.sprites.other?.['official-artwork']?.front_default || poke.sprites.front_default;
+  const spriteShiny  = poke.sprites.other?.['official-artwork']?.front_shiny  || poke.sprites.front_shiny;
+
+  const types = poke.types.map(t => t.type.name);
+  const flavorEntries = species.flavor_text_entries.filter(e => e.language.name === 'en');
+  const flavor = flavorEntries.length ? flavorEntries[flavorEntries.length - 1].flavor_text.replace(/\f|\n/g,' ') : '';
+
+  const stats = poke.stats.map(s => ({
+    name: s.stat.name,
+    value: s.base_stat,
+  }));
+
+  const abilities = poke.abilities.map(a => ({
+    name: a.ability.name.replace('-', ' '),
+    hidden: a.is_hidden,
+  }));
+
+  const genus = species.genera.find(g => g.language.name === 'en')?.genus || '';
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-hero">
+      <div class="modal-bg-number">${String(poke.id).padStart(3,'0')}</div>
+      <img class="modal-sprite" id="modalSprite" src="${spriteNormal || ''}" alt="${poke.name}"/>
+      <div class="sprite-controls">
+        ${spriteShiny ? `<button class="shiny-toggle" id="shinyToggle" onclick="toggleShiny('${spriteNormal}', '${spriteShiny}')">✨ Shiny</button>` : ''}
+      </div>
+      <div class="modal-name">${poke.name}</div>
+      <div class="modal-number">#${String(poke.id).padStart(3,'0')} · ${genus}</div>
+      <div class="modal-types">
+        ${types.map(t => `<span class="type-badge" style="background:${TYPE_COLORS[t]||'#666'}">${t}</span>`).join('')}
+      </div>
+    </div>
+    <div class="modal-body">
+      ${flavor ? `
+        <div class="modal-section">
+          <div class="modal-section-title">Pokédex Entry</div>
+          <div class="flavor-text">${flavor}</div>
+        </div>` : ''}
+      <div class="modal-section">
+        <div class="modal-section-title">Info</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-item-label">Height</div>
+            <div class="info-item-value">${(poke.height * 0.1).toFixed(1)} m</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Weight</div>
+            <div class="info-item-value">${(poke.weight * 0.1).toFixed(1)} kg</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Base XP</div>
+            <div class="info-item-value">${poke.base_experience || '—'}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Capture Rate</div>
+            <div class="info-item-value">${species.capture_rate}</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Base Stats</div>
+        ${stats.map(s => `
+          <div class="stat-row">
+            <div class="stat-name">${STAT_LABELS[s.name] || s.name}</div>
+            <div class="stat-bar-bg">
+              <div class="stat-bar-fill" style="width:${Math.min(s.value/255*100,100)}%;background:${STAT_COLORS[s.name]||'#aaa'}"></div>
+            </div>
+            <div class="stat-value">${s.value}</div>
+          </div>`).join('')}
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Abilities</div>
+        <div class="abilities-list">
+          ${abilities.map(a => `<span class="ability-tag ${a.hidden?'hidden':''}">${a.name}${a.hidden?' ★':''}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleShiny(normal, shiny) {
+  currentShiny = !currentShiny;
+  document.getElementById('modalSprite').src = currentShiny ? shiny : normal;
+  const btn = document.getElementById('shinyToggle');
+  if (btn) btn.classList.toggle('active', currentShiny);
+}
+
+document.getElementById('closeBtn').onclick = closeModal;
+document.getElementById('modalOverlay').onclick = e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+};
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// INIT
+renderRegions();
+loadRegion();
+</script>
+</body>
+</html>
