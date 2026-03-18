@@ -10,6 +10,7 @@
       --red: #e63946;
       --dark-red: #c1121f;
       --yellow: #ffd60a;
+      --gold: #f4a400;
       --dark: #1a1a2e;
       --darker: #0f0f1a;
       --card-bg: #16213e;
@@ -37,17 +38,23 @@
       overflow-x: hidden;
     }
 
-    /* BG pattern */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background-image: radial-gradient(circle at 20% 20%, rgba(230,57,70,0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(112,56,248,0.08) 0%, transparent 50%);
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(230,57,70,0.07) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(112,56,248,0.07) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(255,214,10,0.03) 0%, transparent 60%);
       pointer-events: none;
       z-index: 0;
     }
 
+    /* ─── VIEW MANAGEMENT ─────────────────────────────── */
+    .view { display: block; }
+    .view.hidden { display: none; }
+
+    /* ─── SHARED APP WRAPPER ──────────────────────────── */
     .app {
       max-width: 1100px;
       margin: 0 auto;
@@ -56,7 +63,211 @@
       z-index: 1;
     }
 
-    /* HEADER */
+    /* ─── PAGE NAV (back button row) ─────────────────── */
+    .page-nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      color: var(--muted);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .back-btn:hover {
+      border-color: var(--red);
+      color: var(--white);
+      transform: translateX(-3px);
+    }
+
+    .page-nav-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(10px, 2vw, 14px);
+      color: var(--text);
+    }
+
+    /* ─── HOME PAGE ───────────────────────────────────── */
+    #view-home {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Floating bg pokéballs */
+    .home-bg-ball {
+      position: fixed;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.03);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .home-bg-ball::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      top: 48%; bottom: 48%;
+      background: rgba(255,255,255,0.03);
+    }
+    .home-bg-ball:nth-child(1) { width:280px; height:280px; top:-60px; left:-80px; animation: bgFloat 8s ease-in-out infinite; }
+    .home-bg-ball:nth-child(2) { width:180px; height:180px; bottom:80px; right:-40px; animation: bgFloat 11s ease-in-out infinite reverse; }
+    .home-bg-ball:nth-child(3) { width:120px; height:120px; top:40%; right:8%; animation: bgFloat 7s ease-in-out infinite 2s; }
+    @keyframes bgFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-18px) rotate(15deg); }
+    }
+
+    .home-hero {
+      text-align: center;
+      margin-bottom: 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .home-pokeball {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      animation: homePulse 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 24px rgba(230,57,70,0.5));
+    }
+    @keyframes homePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(230,57,70,0.4)); }
+      50% { transform: scale(1.06); filter: drop-shadow(0 0 40px rgba(230,57,70,0.7)); }
+    }
+
+    .home-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(20px, 5vw, 42px);
+      color: var(--red);
+      text-shadow: 4px 4px 0 #000, -1px -1px 0 #000, 0 0 40px rgba(230,57,70,0.3);
+      line-height: 1.3;
+      letter-spacing: 2px;
+    }
+
+    .home-subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      margin-top: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── NAV CARDS ───────────────────────────────────── */
+    .nav-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+      max-width: 920px;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 680px) {
+      .nav-cards { grid-template-columns: 1fr; max-width: 360px; }
+    }
+
+    .nav-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 24px;
+      padding: 32px 24px 28px;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 65%);
+      pointer-events: none;
+    }
+
+    .nav-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    /* Pokédex card – red */
+    .nav-card-pokedex:hover { border-color: var(--red); box-shadow: 0 20px 50px rgba(230,57,70,0.25); }
+    .nav-card-pokedex .nav-card-accent { background: var(--red); }
+
+    /* Legendary card – gold */
+    .nav-card-legendary { border-color: rgba(244,164,0,0.2); }
+    .nav-card-legendary:hover { border-color: var(--gold); box-shadow: 0 20px 50px rgba(244,164,0,0.25); }
+    .nav-card-legendary .nav-card-accent { background: var(--gold); }
+
+    /* Type chart card – purple */
+    .nav-card-typechart { border-color: rgba(112,56,248,0.2); }
+    .nav-card-typechart:hover { border-color: #7038F8; box-shadow: 0 20px 50px rgba(112,56,248,0.25); }
+    .nav-card-typechart .nav-card-accent { background: #7038F8; }
+
+    /* Top accent bar */
+    .nav-card-accent {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 24px 24px 0 0;
+    }
+
+    .nav-card-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-card-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .nav-card-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(9px, 1.5vw, 12px);
+      color: var(--white);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .nav-card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .nav-card-arrow {
+      display: inline-block;
+      margin-top: 18px;
+      font-size: 18px;
+      color: var(--muted);
+      transition: transform 0.2s, color 0.2s;
+    }
+    .nav-card:hover .nav-card-arrow { transform: translateX(4px); color: var(--white); }
+
+    /* ─── INNER PAGE HEADER ───────────────────────────── */
     header {
       display: flex;
       align-items: center;
@@ -72,7 +283,7 @@
 
     .title-group h1 {
       font-family: 'Press Start 2P', monospace;
-      font-size: clamp(14px, 3vw, 22px);
+      font-size: clamp(12px, 2.5vw, 20px);
       color: var(--red);
       text-shadow: 3px 3px 0 #000, -1px -1px 0 #000;
       line-height: 1.4;
@@ -84,10 +295,14 @@
       margin-top: 6px;
     }
 
-    /* REGION SELECT */
-    .region-section {
-      margin-bottom: 36px;
+    /* Legendary header uses gold accent */
+    .title-legendary h1 {
+      color: var(--gold);
+      text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 0 0 20px rgba(244,164,0,0.3);
     }
+
+    /* ─── REGION / FILTER BUTTONS ─────────────────────── */
+    .region-section { margin-bottom: 36px; }
 
     .section-label {
       font-family: 'Press Start 2P', monospace;
@@ -132,7 +347,16 @@
       box-shadow: 0 4px 20px rgba(230,57,70,0.4);
     }
 
-    /* SEARCH */
+    /* Gold active state for legendary region buttons */
+    .legendary-filter-btn.active {
+      background: var(--gold);
+      border-color: #c8880a;
+      color: #000;
+      box-shadow: 0 4px 20px rgba(244,164,0,0.4);
+    }
+    .legendary-filter-btn:hover { border-color: var(--gold); }
+
+    /* ─── SEARCH BAR ──────────────────────────────────── */
     .search-bar {
       position: relative;
       margin-bottom: 28px;
@@ -165,7 +389,7 @@
       pointer-events: none;
     }
 
-    /* POKEMON GRID */
+    /* ─── POKEMON GRID ────────────────────────────────── */
     .pokemon-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -217,17 +441,6 @@
       filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
     }
 
-    .pokemon-sprite-placeholder {
-      width: 90px;
-      height: 90px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto;
-      font-size: 36px;
-      opacity: 0.3;
-    }
-
     .pokemon-name {
       font-weight: 800;
       font-size: 13px;
@@ -236,26 +449,13 @@
       color: var(--text);
     }
 
-    .type-badges {
-      display: flex;
-      gap: 4px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 8px;
+    /* Legendary card hover uses gold */
+    #view-legendary .pokemon-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(244,164,0,0.3);
     }
 
-    .type-badge {
-      font-size: 9px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 3px 8px;
-      border-radius: 50px;
-      color: white;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    }
-
-    /* LOADING STATE */
+    /* ─── LOADING / SKELETON ─────────────────────────── */
     .loading-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -284,7 +484,7 @@
     .skeleton-line.short { width: 60%; }
     .skeleton-line.med { width: 80%; }
 
-    /* EMPTY STATE */
+    /* ─── EMPTY STATE ─────────────────────────────────── */
     .empty-state {
       text-align: center;
       padding: 60px 20px;
@@ -293,7 +493,7 @@
     .empty-state .emoji { font-size: 64px; margin-bottom: 16px; }
     .empty-state p { font-size: 15px; }
 
-    /* MODAL OVERLAY */
+    /* ─── MODAL OVERLAY ───────────────────────────────── */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -314,7 +514,6 @@
       pointer-events: all;
     }
 
-    /* MODAL CARD */
     .modal-card {
       background: var(--card-bg);
       border: 2px solid var(--card-border);
@@ -387,18 +586,11 @@
       margin-top: 14px;
     }
 
-    .modal-types .type-badge {
-      font-size: 11px;
-      padding: 5px 16px;
-    }
+    .modal-types .type-badge { font-size: 11px; padding: 5px 16px; }
 
-    .modal-body {
-      padding: 0 28px 32px;
-    }
+    .modal-body { padding: 0 28px 32px; }
 
-    .modal-section {
-      margin-top: 24px;
-    }
+    .modal-section { margin-top: 24px; }
 
     .modal-section-title {
       font-family: 'Press Start 2P', monospace;
@@ -436,7 +628,6 @@
       text-transform: capitalize;
     }
 
-    /* STATS */
     .stat-row {
       display: grid;
       grid-template-columns: 100px 1fr 40px;
@@ -472,7 +663,6 @@
       text-align: right;
     }
 
-    /* ABILITIES */
     .abilities-list {
       display: flex;
       flex-wrap: wrap;
@@ -495,7 +685,6 @@
       color: var(--yellow);
     }
 
-    /* CLOSE BUTTON */
     .close-btn {
       position: absolute;
       top: 16px;
@@ -517,7 +706,6 @@
 
     .close-btn:hover { background: rgba(230,57,70,0.4); }
 
-    /* DESCRIPTION */
     .flavor-text {
       background: rgba(255,255,255,0.04);
       border-left: 3px solid var(--red);
@@ -529,7 +717,17 @@
       line-height: 1.6;
     }
 
-    /* SHINY TOGGLE */
+    .type-badge {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 50px;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
     .sprite-controls {
       display: flex;
       align-items: center;
@@ -557,12 +755,135 @@
       color: var(--yellow);
     }
 
-    /* SCROLLBAR */
-    ::-webkit-scrollbar { width: 6px; }
+    /* ─── TYPE CHART PAGE ─────────────────────────────── */
+    .type-chart-intro {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    .type-chart-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 2px solid var(--card-border);
+      background: var(--card-bg);
+      margin-bottom: 28px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .type-chart-table {
+      border-collapse: collapse;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .type-chart-table th,
+    .type-chart-table td {
+      border: 1px solid rgba(255,255,255,0.05);
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    /* Corner label cell */
+    .tc-corner {
+      background: var(--card-bg);
+      padding: 8px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      color: var(--muted);
+      min-width: 90px;
+      position: sticky;
+      left: 0;
+      z-index: 3;
+    }
+
+    /* Column header (defending type) — rotated text */
+    .tc-col-header {
+      width: 40px;
+      min-width: 40px;
+      height: 100px;
+      padding: 6px 4px;
+      position: relative;
+    }
+
+    .tc-col-label {
+      display: inline-block;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-weight: 800;
+      font-size: 10px;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+      letter-spacing: 0.5px;
+      text-transform: capitalize;
+    }
+
+    /* Row header (attacking type) */
+    .tc-row-header {
+      padding: 0 12px;
+      height: 34px;
+      font-weight: 800;
+      font-size: 11px;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+      text-transform: capitalize;
+      text-align: left;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      white-space: nowrap;
+    }
+
+    /* Effectiveness cells */
+    .tc-cell {
+      width: 40px;
+      min-width: 40px;
+      height: 34px;
+      font-weight: 800;
+      font-size: 11px;
+      transition: opacity 0.15s;
+    }
+
+    .tc-cell.eff-normal { background: rgba(255,255,255,0.03); color: transparent; }
+    .tc-cell.eff-super  { background: #27ae60; color: #fff; }
+    .tc-cell.eff-half   { background: #c0392b; color: #fff; }
+    .tc-cell.eff-immune { background: #1a1a2e; color: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.03) !important; }
+
+    .type-chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .legend-swatch {
+      width: 32px;
+      height: 22px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* ─── SCROLLBAR ───────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--darker); }
     ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
 
-    /* RESPONSIVE */
+    /* ─── RESPONSIVE ──────────────────────────────────── */
     @media (max-width: 500px) {
       .info-grid { grid-template-columns: 1fr; }
       .stat-row { grid-template-columns: 80px 1fr 36px; }
@@ -570,37 +891,190 @@
   </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <svg class="pokeball-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+<!-- ══════════════════════════════════════════════════════
+     HOME VIEW
+═══════════════════════════════════════════════════════ -->
+<div id="view-home" class="view">
+  <!-- Decorative bg circles -->
+  <div class="home-bg-ball"></div>
+  <div class="home-bg-ball"></div>
+  <div class="home-bg-ball"></div>
+
+  <div class="home-hero">
+    <svg class="home-pokeball" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="50" cy="50" r="48" fill="#e63946" stroke="#000" stroke-width="4"/>
-      <path d="M2 50 Q2 2 50 2" fill="#e63946"/>
-      <path d="M50 2 Q98 2 98 50" fill="#e63946"/>
+      <path d="M2 50 Q2 2 50 2 Q98 2 98 50" fill="#e63946"/>
       <rect x="2" y="46" width="96" height="8" fill="#000"/>
       <circle cx="50" cy="50" r="14" fill="#000" stroke="#000" stroke-width="4"/>
       <circle cx="50" cy="50" r="10" fill="white"/>
       <circle cx="50" cy="50" r="5" fill="#e63946"/>
     </svg>
-    <div class="title-group">
-      <h1>Pokédex</h1>
-      <p>Explore all Pokémon regions & find your favourites!</p>
+    <h1 class="home-title">Pokédex</h1>
+    <p class="home-subtitle">Your ultimate Pokémon companion</p>
+  </div>
+
+  <div class="nav-cards">
+
+    <!-- Pokédex card -->
+    <div class="nav-card nav-card-pokedex" onclick="goPokedex()">
+      <div class="nav-card-accent"></div>
+      <div class="nav-card-icon">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="46" fill="#e63946" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+          <rect x="4" y="44" width="92" height="12" fill="#1a1a2e"/>
+          <circle cx="50" cy="50" r="13" fill="#1a1a2e" stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
+          <circle cx="50" cy="50" r="7" fill="white"/>
+          <circle cx="50" cy="50" r="3.5" fill="#e63946"/>
+        </svg>
+      </div>
+      <div class="nav-card-title">Pokédex</div>
+      <div class="nav-card-desc">Browse all Pokémon across 9 regions — from Kanto to Paldea</div>
+      <div class="nav-card-arrow">→</div>
     </div>
-  </header>
 
-  <div class="region-section">
-    <div class="section-label">Choose a Region</div>
-    <div class="region-grid" id="regionGrid"></div>
+    <!-- Legendary card -->
+    <div class="nav-card nav-card-legendary" onclick="goLegendary()">
+      <div class="nav-card-accent"></div>
+      <div class="nav-card-icon">
+        <svg viewBox="0 0 24 24" fill="#f4a400" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z" opacity="0.9"/>
+          <path d="M12 5.5l1.84 4.17 4.52.38-3.43 2.97 1.03 4.42L12 15.1l-3.96 2.34 1.03-4.42L5.64 10l4.52-.38L12 5.5z" fill="rgba(255,255,255,0.3)"/>
+        </svg>
+      </div>
+      <div class="nav-card-title">Legendaries</div>
+      <div class="nav-card-desc">All Legendary & Mythical Pokémon, filtered across every generation</div>
+      <div class="nav-card-arrow">→</div>
+    </div>
+
+    <!-- Type chart card -->
+    <div class="nav-card nav-card-typechart" onclick="goTypeChart()">
+      <div class="nav-card-accent"></div>
+      <div class="nav-card-icon" id="homeTypeIcon">
+        <!-- Tiny type-dot grid, injected by JS -->
+      </div>
+      <div class="nav-card-title">Type Chart</div>
+      <div class="nav-card-desc">Full 18×18 type effectiveness matrix — know your matchups</div>
+      <div class="nav-card-arrow">→</div>
+    </div>
+
   </div>
-
-  <div class="search-bar">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Search Pokémon by name..." autocomplete="off"/>
-  </div>
-
-  <div id="mainContent"></div>
 </div>
 
-<!-- MODAL -->
+<!-- ══════════════════════════════════════════════════════
+     POKÉDEX VIEW
+═══════════════════════════════════════════════════════ -->
+<div id="view-pokedex" class="view hidden">
+  <div class="app">
+    <div class="page-nav">
+      <button class="back-btn" onclick="goHome()">← Home</button>
+      <div class="page-nav-title">Pokédex</div>
+    </div>
+    <header>
+      <svg class="pokeball-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="#e63946" stroke="#000" stroke-width="4"/>
+        <rect x="2" y="46" width="96" height="8" fill="#000"/>
+        <circle cx="50" cy="50" r="14" fill="#000" stroke="#000" stroke-width="4"/>
+        <circle cx="50" cy="50" r="10" fill="white"/>
+        <circle cx="50" cy="50" r="5" fill="#e63946"/>
+      </svg>
+      <div class="title-group">
+        <h1>Pokédex</h1>
+        <p>Explore all Pokémon regions &amp; find your favourites!</p>
+      </div>
+    </header>
+
+    <div class="region-section">
+      <div class="section-label">Choose a Region</div>
+      <div class="region-grid" id="regionGrid"></div>
+    </div>
+
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="pokedexSearch" placeholder="Search Pokémon by name..." autocomplete="off"/>
+    </div>
+
+    <div id="pokedexContent"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     LEGENDARY VIEW
+═══════════════════════════════════════════════════════ -->
+<div id="view-legendary" class="view hidden">
+  <div class="app">
+    <div class="page-nav">
+      <button class="back-btn" onclick="goHome()">← Home</button>
+      <div class="page-nav-title">Legendaries</div>
+    </div>
+    <header>
+      <svg class="pokeball-icon" viewBox="0 0 24 24" fill="#f4a400" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z"/>
+      </svg>
+      <div class="title-group title-legendary">
+        <h1>Legendaries</h1>
+        <p>Legendary &amp; Mythical Pokémon across all regions</p>
+      </div>
+    </header>
+
+    <div class="region-section">
+      <div class="section-label">Filter by Region</div>
+      <div class="region-grid" id="legendaryRegionGrid"></div>
+    </div>
+
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="legendarySearch" placeholder="Search legendary Pokémon..." autocomplete="off"/>
+    </div>
+
+    <div id="legendaryContent"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TYPE CHART VIEW
+═══════════════════════════════════════════════════════ -->
+<div id="view-typechart" class="view hidden">
+  <div class="app">
+    <div class="page-nav">
+      <button class="back-btn" onclick="goHome()">← Home</button>
+      <div class="page-nav-title">Type Chart</div>
+    </div>
+    <header>
+      <div class="title-group">
+        <h1 style="color:#7038F8;text-shadow:3px 3px 0 #000,-1px -1px 0 #000,0 0 20px rgba(112,56,248,0.4)">Type Chart</h1>
+        <p>Rows = Attacking type · Columns = Defending type</p>
+      </div>
+    </header>
+
+    <div class="type-chart-wrapper">
+      <div id="typeChartContainer"></div>
+    </div>
+
+    <div class="type-chart-legend">
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#27ae60">2×</div>
+        Super Effective
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#c0392b">½</div>
+        Not Very Effective
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.1)">0</div>
+        No Effect (Immune)
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"></div>
+        Normal (1×)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SHARED MODAL
+═══════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-card" id="modalCard">
     <button class="close-btn" id="closeBtn">✕</button>
@@ -609,6 +1083,9 @@
 </div>
 
 <script>
+/* ════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════ */
 const REGIONS = [
   { name: 'Kanto',  id: 'kanto',  offset: 0,   limit: 151 },
   { name: 'Johto',  id: 'johto',  offset: 151, limit: 100 },
@@ -621,12 +1098,105 @@ const REGIONS = [
   { name: 'Paldea', id: 'paldea', offset: 905, limit: 120 },
 ];
 
+const LEGENDARIES_BY_REGION = {
+  kanto:  [
+    {name:'articuno',id:144},{name:'zapdos',id:145},{name:'moltres',id:146},
+    {name:'mewtwo',id:150},{name:'mew',id:151},
+  ],
+  johto:  [
+    {name:'raikou',id:243},{name:'entei',id:244},{name:'suicune',id:245},
+    {name:'lugia',id:249},{name:'ho-oh',id:250},{name:'celebi',id:251},
+  ],
+  hoenn:  [
+    {name:'regirock',id:377},{name:'regice',id:378},{name:'registeel',id:379},
+    {name:'latias',id:380},{name:'latios',id:381},{name:'kyogre',id:382},
+    {name:'groudon',id:383},{name:'rayquaza',id:384},{name:'jirachi',id:385},
+    {name:'deoxys',id:386},
+  ],
+  sinnoh: [
+    {name:'uxie',id:480},{name:'mesprit',id:481},{name:'azelf',id:482},
+    {name:'dialga',id:483},{name:'palkia',id:484},{name:'heatran',id:485},
+    {name:'regigigas',id:486},{name:'giratina',id:487},{name:'cresselia',id:488},
+    {name:'phione',id:489},{name:'manaphy',id:490},{name:'darkrai',id:491},
+    {name:'shaymin',id:492},{name:'arceus',id:493},
+  ],
+  unova:  [
+    {name:'victini',id:494},{name:'cobalion',id:638},{name:'terrakion',id:639},
+    {name:'virizion',id:640},{name:'tornadus',id:641},{name:'thundurus',id:642},
+    {name:'reshiram',id:643},{name:'zekrom',id:644},{name:'landorus',id:645},
+    {name:'kyurem',id:646},{name:'keldeo',id:647},{name:'meloetta',id:648},
+    {name:'genesect',id:649},
+  ],
+  kalos:  [
+    {name:'xerneas',id:716},{name:'yveltal',id:717},{name:'zygarde',id:718},
+    {name:'diancie',id:719},{name:'hoopa',id:720},{name:'volcanion',id:721},
+  ],
+  alola:  [
+    {name:'type-null',id:772},{name:'silvally',id:773},
+    {name:'tapu-koko',id:785},{name:'tapu-lele',id:786},
+    {name:'tapu-bulu',id:787},{name:'tapu-fini',id:788},
+    {name:'cosmog',id:789},{name:'cosmoem',id:790},
+    {name:'solgaleo',id:791},{name:'lunala',id:792},
+    {name:'nihilego',id:793},{name:'buzzwole',id:794},
+    {name:'pheromosa',id:795},{name:'xurkitree',id:796},
+    {name:'celesteela',id:797},{name:'kartana',id:798},
+    {name:'guzzlord',id:799},{name:'necrozma',id:800},
+    {name:'magearna',id:801},{name:'marshadow',id:802},
+    {name:'poipole',id:803},{name:'naganadel',id:804},
+    {name:'stakataka',id:805},{name:'blacephalon',id:806},
+    {name:'zeraora',id:807},
+  ],
+  galar:  [
+    {name:'zacian',id:888},{name:'zamazenta',id:889},{name:'eternatus',id:890},
+    {name:'kubfu',id:891},{name:'urshifu',id:892},{name:'zarude',id:893},
+    {name:'regieleki',id:894},{name:'regidrago',id:895},
+    {name:'glastrier',id:896},{name:'spectrier',id:897},
+    {name:'calyrex',id:898},{name:'enamorus',id:905},
+  ],
+  paldea: [
+    {name:'wo-chien',id:1001},{name:'chien-pao',id:1002},
+    {name:'ting-lu',id:1003},{name:'chi-yu',id:1004},
+    {name:'koraidon',id:1007},{name:'miraidon',id:1008},
+    {name:'walking-wake',id:1009},{name:'iron-leaves',id:1010},
+    {name:'okidogi',id:1017},{name:'munkidori',id:1018},
+    {name:'fezandipiti',id:1019},{name:'ogerpon',id:1020},
+    {name:'gouging-fire',id:1021},{name:'raging-bolt',id:1022},
+    {name:'iron-boulder',id:1023},{name:'iron-crown',id:1024},
+    {name:'terapagos',id:1025},{name:'pecharunt',id:1026},
+  ],
+};
+
+const TYPES = ['normal','fire','water','electric','grass','ice','fighting','poison',
+               'ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
+
 const TYPE_COLORS = {
   normal:'#A8A878',fire:'#F08030',water:'#6890F0',electric:'#F8D030',
   grass:'#78C850',ice:'#98D8D8',fighting:'#C03028',poison:'#A040A0',
   ground:'#E0C068',flying:'#A890F0',psychic:'#F85888',bug:'#A8B820',
   rock:'#B8A038',ghost:'#705898',dragon:'#7038F8',dark:'#705848',
   steel:'#B8B8D0',fairy:'#EE99AC',
+};
+
+// ATK (row) → DEF (col): only non-1× entries listed
+const TYPE_CHART = {
+  normal:   { rock:0.5, ghost:0, steel:0.5 },
+  fire:     { fire:0.5, water:0.5, grass:2, ice:2, bug:2, rock:0.5, dragon:0.5, steel:2 },
+  water:    { fire:2, water:0.5, grass:0.5, ground:2, rock:2, dragon:0.5 },
+  electric: { water:2, electric:0.5, grass:0.5, ground:0, flying:2, dragon:0.5 },
+  grass:    { fire:0.5, water:2, grass:0.5, poison:0.5, ground:2, flying:0.5, bug:0.5, rock:2, dragon:0.5, steel:0.5 },
+  ice:      { fire:0.5, water:0.5, grass:2, ice:0.5, ground:2, flying:2, dragon:2, steel:0.5 },
+  fighting: { normal:2, ice:2, poison:0.5, flying:0.5, psychic:0.5, bug:0.5, rock:2, ghost:0, dark:2, steel:2, fairy:0.5 },
+  poison:   { grass:2, poison:0.5, ground:0.5, rock:0.5, ghost:0.5, steel:0, fairy:2 },
+  ground:   { fire:2, electric:2, grass:0.5, poison:2, flying:0, bug:0.5, rock:2, steel:2 },
+  flying:   { electric:0.5, grass:2, fighting:2, bug:2, rock:0.5, steel:0.5 },
+  psychic:  { fighting:2, poison:2, psychic:0.5, dark:0, steel:0.5 },
+  bug:      { fire:0.5, grass:2, fighting:0.5, flying:0.5, psychic:2, ghost:0.5, dark:2, steel:0.5, fairy:0.5 },
+  rock:     { fire:2, ice:2, fighting:0.5, ground:0.5, flying:2, bug:2, steel:0.5 },
+  ghost:    { normal:0, psychic:2, ghost:2, dark:0.5 },
+  dragon:   { dragon:2, steel:0.5, fairy:0 },
+  dark:     { fighting:0.5, psychic:2, ghost:2, dark:0.5, fairy:0.5 },
+  steel:    { fire:0.5, water:0.5, electric:0.5, ice:2, rock:2, steel:0.5, fairy:2 },
+  fairy:    { fire:0.5, fighting:2, poison:0.5, dragon:2, dark:2, steel:0.5 },
 };
 
 const STAT_COLORS = {
@@ -639,6 +1209,38 @@ const STAT_LABELS = {
   'special-attack':'Sp. Atk', 'special-defense':'Sp. Def', speed:'Speed'
 };
 
+/* ════════════════════════════════════════════════════════
+   VIEW NAVIGATION
+═══════════════════════════════════════════════════════ */
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+function goHome() { showView('view-home'); }
+
+function goPokedex() {
+  showView('view-pokedex');
+  if (!allPokemon.length) {
+    renderRegions();
+    loadRegion();
+  }
+}
+
+function goLegendary() {
+  showView('view-legendary');
+  selectLegendaryRegion('all');
+}
+
+function goTypeChart() {
+  showView('view-typechart');
+  renderTypeChart();
+}
+
+/* ════════════════════════════════════════════════════════
+   POKÉDEX
+═══════════════════════════════════════════════════════ */
 let currentRegion = REGIONS[0];
 let allPokemon = [];
 let filteredPokemon = [];
@@ -654,12 +1256,12 @@ function renderRegions() {
 
 async function selectRegion(id) {
   currentRegion = REGIONS.find(r => r.id === id);
-  document.getElementById('searchInput').value = '';
+  document.getElementById('pokedexSearch').value = '';
   renderRegions();
   await loadRegion();
 }
 
-function showLoading() {
+function showLoading(containerId) {
   const skeletons = Array.from({length: 12}, () => `
     <div class="skeleton-card">
       <div class="skeleton skeleton-line short" style="height:10px;margin-bottom:10px"></div>
@@ -668,25 +1270,22 @@ function showLoading() {
       <div class="skeleton skeleton-line short"></div>
     </div>
   `).join('');
-  document.getElementById('mainContent').innerHTML = `<div class="loading-grid">${skeletons}</div>`;
+  document.getElementById(containerId).innerHTML = `<div class="loading-grid">${skeletons}</div>`;
 }
 
 async function loadRegion() {
-  showLoading();
+  showLoading('pokedexContent');
   const { offset, limit, id } = currentRegion;
-  const key = id;
-
-  if (!cache[key]) {
+  if (!cache[id]) {
     try {
       const res = await fetch(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`);
       const data = await res.json();
-      cache[key] = data.results.map((p, i) => ({
+      cache[id] = data.results.map((p, i) => ({
         name: p.name,
         id: offset + i + 1,
-        url: p.url,
       }));
     } catch(e) {
-      document.getElementById('mainContent').innerHTML = `
+      document.getElementById('pokedexContent').innerHTML = `
         <div class="empty-state">
           <div class="emoji">😵</div>
           <p>Couldn't connect to PokéAPI. Check your internet and try again!</p>
@@ -694,25 +1293,22 @@ async function loadRegion() {
       return;
     }
   }
-
-  allPokemon = cache[key];
+  allPokemon = cache[id];
   filteredPokemon = [...allPokemon];
-  renderGrid(filteredPokemon);
+  renderGrid(filteredPokemon, 'pokedexContent');
 }
 
-function renderGrid(list) {
+function renderGrid(list, containerId) {
   if (list.length === 0) {
-    document.getElementById('mainContent').innerHTML = `
+    document.getElementById(containerId).innerHTML = `
       <div class="empty-state">
         <div class="emoji">🔎</div>
         <p>No Pokémon found matching your search.</p>
       </div>`;
     return;
   }
-  document.getElementById('mainContent').innerHTML = `
-    <div class="pokemon-grid">
-      ${list.map(p => renderCard(p)).join('')}
-    </div>`;
+  document.getElementById(containerId).innerHTML = `
+    <div class="pokemon-grid">${list.map(p => renderCard(p)).join('')}</div>`;
 }
 
 function renderCard(p) {
@@ -722,18 +1318,101 @@ function renderCard(p) {
       <div class="pokemon-number">#${String(p.id).padStart(3,'0')}</div>
       <img class="pokemon-sprite" src="${spriteUrl}" alt="${p.name}" loading="lazy"
         onerror="this.style.display='none'"/>
-      <div class="pokemon-name">${p.name}</div>
+      <div class="pokemon-name">${p.name.replace(/-/g,' ')}</div>
     </div>`;
 }
 
-// SEARCH
-document.getElementById('searchInput').addEventListener('input', e => {
+document.getElementById('pokedexSearch').addEventListener('input', e => {
   const q = e.target.value.toLowerCase().trim();
   filteredPokemon = allPokemon.filter(p => p.name.includes(q));
-  renderGrid(filteredPokemon);
+  renderGrid(filteredPokemon, 'pokedexContent');
 });
 
-// MODAL
+/* ════════════════════════════════════════════════════════
+   LEGENDARY POKÉDEX
+═══════════════════════════════════════════════════════ */
+let currentLegendaryRegion = 'all';
+let allLegendaries = [];
+let filteredLegendaries = [];
+
+const LEGENDARY_REGION_LIST = [
+  { name: 'All',    id: 'all'    },
+  { name: 'Kanto',  id: 'kanto'  },
+  { name: 'Johto',  id: 'johto'  },
+  { name: 'Hoenn',  id: 'hoenn'  },
+  { name: 'Sinnoh', id: 'sinnoh' },
+  { name: 'Unova',  id: 'unova'  },
+  { name: 'Kalos',  id: 'kalos'  },
+  { name: 'Alola',  id: 'alola'  },
+  { name: 'Galar',  id: 'galar'  },
+  { name: 'Paldea', id: 'paldea' },
+];
+
+function renderLegendaryRegions() {
+  document.getElementById('legendaryRegionGrid').innerHTML = LEGENDARY_REGION_LIST.map(r => `
+    <button class="region-btn legendary-filter-btn ${r.id === currentLegendaryRegion ? 'active' : ''}"
+      onclick="selectLegendaryRegion('${r.id}')">${r.name}</button>
+  `).join('');
+}
+
+function selectLegendaryRegion(id) {
+  currentLegendaryRegion = id;
+  document.getElementById('legendarySearch').value = '';
+  renderLegendaryRegions();
+  allLegendaries = id === 'all'
+    ? Object.values(LEGENDARIES_BY_REGION).flat()
+    : (LEGENDARIES_BY_REGION[id] || []);
+  filteredLegendaries = [...allLegendaries];
+  renderGrid(filteredLegendaries, 'legendaryContent');
+}
+
+document.getElementById('legendarySearch').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase().trim();
+  filteredLegendaries = allLegendaries.filter(p => p.name.includes(q));
+  renderGrid(filteredLegendaries, 'legendaryContent');
+});
+
+/* ════════════════════════════════════════════════════════
+   TYPE CHART
+═══════════════════════════════════════════════════════ */
+let typeChartRendered = false;
+
+function renderTypeChart() {
+  if (typeChartRendered) return;
+  typeChartRendered = true;
+
+  let html = '<table class="type-chart-table"><thead><tr>';
+  html += `<th class="tc-corner">ATK ↓ DEF →</th>`;
+
+  TYPES.forEach(t => {
+    html += `<th class="tc-col-header" style="background:${TYPE_COLORS[t]}20;border-bottom:3px solid ${TYPE_COLORS[t]}">
+      <span class="tc-col-label" style="color:${TYPE_COLORS[t]}">${t}</span>
+    </th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  TYPES.forEach(atk => {
+    html += `<tr>
+      <td class="tc-row-header" style="background:${TYPE_COLORS[atk]};min-width:90px">${atk}</td>`;
+    TYPES.forEach(def => {
+      const eff = (TYPE_CHART[atk] || {})[def] ?? 1;
+      let cls, label;
+      if (eff === 2)   { cls = 'eff-super';  label = '2×'; }
+      else if (eff === 0.5) { cls = 'eff-half'; label = '½'; }
+      else if (eff === 0)   { cls = 'eff-immune'; label = '0'; }
+      else                  { cls = 'eff-normal'; label = ''; }
+      html += `<td class="tc-cell ${cls}">${label}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('typeChartContainer').innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════ */
 async function openModal(id, name) {
   const overlay = document.getElementById('modalOverlay');
   document.getElementById('modalContent').innerHTML = `
@@ -741,7 +1420,7 @@ async function openModal(id, name) {
       <div style="width:160px;height:160px;margin:0 auto;display:flex;align-items:center;justify-content:center;">
         <div style="font-size:48px;opacity:0.3">⏳</div>
       </div>
-      <div class="modal-name">${name}</div>
+      <div class="modal-name">${name.replace(/-/g,' ')}</div>
     </div>`;
   overlay.classList.add('open');
 
@@ -766,31 +1445,24 @@ function renderModal(poke, species) {
   currentShiny = false;
   const spriteNormal = poke.sprites.other?.['official-artwork']?.front_default || poke.sprites.front_default;
   const spriteShiny  = poke.sprites.other?.['official-artwork']?.front_shiny  || poke.sprites.front_shiny;
-
   const types = poke.types.map(t => t.type.name);
   const flavorEntries = species.flavor_text_entries.filter(e => e.language.name === 'en');
-  const flavor = flavorEntries.length ? flavorEntries[flavorEntries.length - 1].flavor_text.replace(/\f|\n/g,' ') : '';
-
-  const stats = poke.stats.map(s => ({
-    name: s.stat.name,
-    value: s.base_stat,
-  }));
-
-  const abilities = poke.abilities.map(a => ({
-    name: a.ability.name.replace('-', ' '),
-    hidden: a.is_hidden,
-  }));
-
+  const flavor = flavorEntries.length
+    ? flavorEntries[flavorEntries.length - 1].flavor_text.replace(/\f|\n/g,' ')
+    : '';
+  const stats = poke.stats.map(s => ({ name: s.stat.name, value: s.base_stat }));
+  const abilities = poke.abilities.map(a => ({ name: a.ability.name.replace(/-/g,' '), hidden: a.is_hidden }));
   const genus = species.genera.find(g => g.language.name === 'en')?.genus || '';
+  const isLegendary = species.is_legendary || species.is_mythical;
 
   document.getElementById('modalContent').innerHTML = `
     <div class="modal-hero">
       <div class="modal-bg-number">${String(poke.id).padStart(3,'0')}</div>
       <img class="modal-sprite" id="modalSprite" src="${spriteNormal || ''}" alt="${poke.name}"/>
       <div class="sprite-controls">
-        ${spriteShiny ? `<button class="shiny-toggle" id="shinyToggle" onclick="toggleShiny('${spriteNormal}', '${spriteShiny}')">✨ Shiny</button>` : ''}
+        ${spriteShiny ? `<button class="shiny-toggle" id="shinyToggle" onclick="toggleShiny('${spriteNormal}','${spriteShiny}')">✨ Shiny</button>` : ''}
       </div>
-      <div class="modal-name">${poke.name}</div>
+      <div class="modal-name">${poke.name.replace(/-/g,' ')}${isLegendary ? ' ⭐' : ''}</div>
       <div class="modal-number">#${String(poke.id).padStart(3,'0')} · ${genus}</div>
       <div class="modal-types">
         ${types.map(t => `<span class="type-badge" style="background:${TYPE_COLORS[t]||'#666'}">${t}</span>`).join('')}
@@ -854,15 +1526,36 @@ document.getElementById('closeBtn').onclick = closeModal;
 document.getElementById('modalOverlay').onclick = e => {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 };
-document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
 }
 
-// INIT
-renderRegions();
-loadRegion();
+/* ════════════════════════════════════════════════════════
+   HOME PAGE TYPE-DOT ICON
+═══════════════════════════════════════════════════════ */
+function renderHomeTypeIcon() {
+  const sample = ['fire','water','grass','electric','psychic','dragon','ghost','steel','fairy'];
+  const size = 16;
+  const gap = 4;
+  let svg = `<svg viewBox="0 0 ${3*(size+gap)-gap} ${3*(size+gap)-gap}" xmlns="http://www.w3.org/2000/svg">`;
+  sample.slice(0,9).forEach((t, i) => {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const x = col * (size + gap);
+    const y = row * (size + gap);
+    svg += `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="4" fill="${TYPE_COLORS[t]}" opacity="0.9"/>`;
+  });
+  svg += '</svg>';
+  document.getElementById('homeTypeIcon').innerHTML = svg;
+}
+
+/* ════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+renderHomeTypeIcon();
+showView('view-home');
 </script>
 </body>
 </html>
