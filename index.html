@@ -1098,72 +1098,20 @@ const REGIONS = [
   { name: 'Paldea', id: 'paldea', offset: 905, limit: 120 },
 ];
 
-const LEGENDARIES_BY_REGION = {
-  kanto:  [
-    {name:'articuno',id:144},{name:'zapdos',id:145},{name:'moltres',id:146},
-    {name:'mewtwo',id:150},{name:'mew',id:151},
-  ],
-  johto:  [
-    {name:'raikou',id:243},{name:'entei',id:244},{name:'suicune',id:245},
-    {name:'lugia',id:249},{name:'ho-oh',id:250},{name:'celebi',id:251},
-  ],
-  hoenn:  [
-    {name:'regirock',id:377},{name:'regice',id:378},{name:'registeel',id:379},
-    {name:'latias',id:380},{name:'latios',id:381},{name:'kyogre',id:382},
-    {name:'groudon',id:383},{name:'rayquaza',id:384},{name:'jirachi',id:385},
-    {name:'deoxys',id:386},
-  ],
-  sinnoh: [
-    {name:'uxie',id:480},{name:'mesprit',id:481},{name:'azelf',id:482},
-    {name:'dialga',id:483},{name:'palkia',id:484},{name:'heatran',id:485},
-    {name:'regigigas',id:486},{name:'giratina',id:487},{name:'cresselia',id:488},
-    {name:'phione',id:489},{name:'manaphy',id:490},{name:'darkrai',id:491},
-    {name:'shaymin',id:492},{name:'arceus',id:493},
-  ],
-  unova:  [
-    {name:'victini',id:494},{name:'cobalion',id:638},{name:'terrakion',id:639},
-    {name:'virizion',id:640},{name:'tornadus',id:641},{name:'thundurus',id:642},
-    {name:'reshiram',id:643},{name:'zekrom',id:644},{name:'landorus',id:645},
-    {name:'kyurem',id:646},{name:'keldeo',id:647},{name:'meloetta',id:648},
-    {name:'genesect',id:649},
-  ],
-  kalos:  [
-    {name:'xerneas',id:716},{name:'yveltal',id:717},{name:'zygarde',id:718},
-    {name:'diancie',id:719},{name:'hoopa',id:720},{name:'volcanion',id:721},
-  ],
-  alola:  [
-    {name:'type-null',id:772},{name:'silvally',id:773},
-    {name:'tapu-koko',id:785},{name:'tapu-lele',id:786},
-    {name:'tapu-bulu',id:787},{name:'tapu-fini',id:788},
-    {name:'cosmog',id:789},{name:'cosmoem',id:790},
-    {name:'solgaleo',id:791},{name:'lunala',id:792},
-    {name:'nihilego',id:793},{name:'buzzwole',id:794},
-    {name:'pheromosa',id:795},{name:'xurkitree',id:796},
-    {name:'celesteela',id:797},{name:'kartana',id:798},
-    {name:'guzzlord',id:799},{name:'necrozma',id:800},
-    {name:'magearna',id:801},{name:'marshadow',id:802},
-    {name:'poipole',id:803},{name:'naganadel',id:804},
-    {name:'stakataka',id:805},{name:'blacephalon',id:806},
-    {name:'zeraora',id:807},
-  ],
-  galar:  [
-    {name:'zacian',id:888},{name:'zamazenta',id:889},{name:'eternatus',id:890},
-    {name:'kubfu',id:891},{name:'urshifu',id:892},{name:'zarude',id:893},
-    {name:'regieleki',id:894},{name:'regidrago',id:895},
-    {name:'glastrier',id:896},{name:'spectrier',id:897},
-    {name:'calyrex',id:898},{name:'enamorus',id:905},
-  ],
-  paldea: [
-    {name:'wo-chien',id:1001},{name:'chien-pao',id:1002},
-    {name:'ting-lu',id:1003},{name:'chi-yu',id:1004},
-    {name:'koraidon',id:1007},{name:'miraidon',id:1008},
-    {name:'walking-wake',id:1009},{name:'iron-leaves',id:1010},
-    {name:'okidogi',id:1017},{name:'munkidori',id:1018},
-    {name:'fezandipiti',id:1019},{name:'ogerpon',id:1020},
-    {name:'gouging-fire',id:1021},{name:'raging-bolt',id:1022},
-    {name:'iron-boulder',id:1023},{name:'iron-crown',id:1024},
-    {name:'terapagos',id:1025},{name:'pecharunt',id:1026},
-  ],
+// Candidate IDs per region — PokéAPI is_legendary/is_mythical is the final filter
+// (intentionally broad so nothing real is missed; non-legendaries are dropped automatically)
+const LEGENDARY_CANDIDATES = {
+  kanto:  [144,145,146,150,151],
+  johto:  [243,244,245,249,250,251],
+  hoenn:  [377,378,379,380,381,382,383,384,385,386],
+  sinnoh: [480,481,482,483,484,485,486,487,488,489,490,491,492,493],
+  unova:  [494,638,639,640,641,642,643,644,645,646,647,648,649],
+  kalos:  [716,717,718,719,720,721],
+  alola:  [772,773,785,786,787,788,789,790,791,792,793,794,795,
+           796,797,798,799,800,801,802,803,804,805,806,807,808,809],
+  galar:  [888,889,890,891,892,893,894,895,896,897,898,905],
+  paldea: [1001,1002,1003,1004,1007,1008,1009,1010,
+           1014,1015,1016,1017,1020,1021,1022,1023,1024,1025],
 };
 
 const TYPES = ['normal','fire','water','electric','grass','ice','fighting','poison',
@@ -1329,11 +1277,17 @@ document.getElementById('pokedexSearch').addEventListener('input', e => {
 });
 
 /* ════════════════════════════════════════════════════════
-   LEGENDARY POKÉDEX
+   LEGENDARY POKÉDEX — dynamically verified via PokéAPI
+   Uses the same is_legendary / is_mythical flags that
+   produce the ⭐ star in the regular Pokédex modal.
 ═══════════════════════════════════════════════════════ */
 let currentLegendaryRegion = 'all';
 let allLegendaries = [];
 let filteredLegendaries = [];
+
+// Cache: null = not started, Promise = in-flight, object = done
+let legendaryCachePromise = null;
+let legendaryCache = null; // { kanto: [{id,name}], ..., all: [...] }
 
 const LEGENDARY_REGION_LIST = [
   { name: 'All',    id: 'all'    },
@@ -1355,15 +1309,67 @@ function renderLegendaryRegions() {
   `).join('');
 }
 
-function selectLegendaryRegion(id) {
+// Fetch all candidate species in parallel, filter to legendary/mythical only,
+// then partition into per-region caches. Called once; result is shared.
+function buildLegendaryCache() {
+  if (legendaryCachePromise) return legendaryCachePromise;
+
+  legendaryCachePromise = (async () => {
+    const regionIds = Object.keys(LEGENDARY_CANDIDATES);
+    const allIds = [...new Set(Object.values(LEGENDARY_CANDIDATES).flat())];
+
+    const results = await Promise.allSettled(
+      allIds.map(id =>
+        fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`)
+          .then(r => r.json())
+          .then(s => ({ id: s.id, name: s.name, ok: s.is_legendary || s.is_mythical }))
+      )
+    );
+
+    // id → species info (only successful fetches)
+    const speciesMap = {};
+    results.forEach(r => {
+      if (r.status === 'fulfilled') speciesMap[r.value.id] = r.value;
+    });
+
+    const cache = {};
+    regionIds.forEach(regionId => {
+      cache[regionId] = LEGENDARY_CANDIDATES[regionId]
+        .filter(id => speciesMap[id]?.ok)
+        .map(id => ({ id, name: speciesMap[id].name }));
+    });
+
+    // 'all' = union of all regions, sorted by Pokédex number
+    cache['all'] = regionIds
+      .flatMap(r => cache[r])
+      .filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i)
+      .sort((a, b) => a.id - b.id);
+
+    legendaryCache = cache;
+    return cache;
+  })();
+
+  return legendaryCachePromise;
+}
+
+async function selectLegendaryRegion(id) {
   currentLegendaryRegion = id;
   document.getElementById('legendarySearch').value = '';
   renderLegendaryRegions();
-  allLegendaries = id === 'all'
-    ? Object.values(LEGENDARIES_BY_REGION).flat()
-    : (LEGENDARIES_BY_REGION[id] || []);
-  filteredLegendaries = [...allLegendaries];
-  renderGrid(filteredLegendaries, 'legendaryContent');
+  showLoading('legendaryContent');
+
+  try {
+    const cache = await buildLegendaryCache();
+    allLegendaries = cache[id] || [];
+    filteredLegendaries = [...allLegendaries];
+    renderGrid(filteredLegendaries, 'legendaryContent');
+  } catch(e) {
+    document.getElementById('legendaryContent').innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">😵</div>
+        <p>Couldn't load legendary Pokémon. Check your internet and try again!</p>
+      </div>`;
+  }
 }
 
 document.getElementById('legendarySearch').addEventListener('input', e => {
@@ -1556,6 +1562,8 @@ function renderHomeTypeIcon() {
 ═══════════════════════════════════════════════════════ */
 renderHomeTypeIcon();
 showView('view-home');
+// Pre-warm legendary cache silently in the background
+buildLegendaryCache();
 </script>
 </body>
 </html>
